@@ -7,6 +7,6 @@ A project to capture and share tips, tricks, snipplets, and solutions built arou
 Not much to see here (yet).
 
 # Index
-* [Standard Development Environment]("{{page.url | prepend: site.github.url}}"")
+* [Standard Development Environment]({{ site.baseurl }}{% link devenv/index.html %})
 
 
