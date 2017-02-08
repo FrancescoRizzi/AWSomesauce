@@ -7,4 +7,4 @@ A project to capture and share tips, tricks, snipplets, and solutions built arou
 Not much to see here (yet).
 
 # Index
-* [Standard Development Environment]({{ site.baseurl }}{% link devenv/index.html %})
+* [Standard Development Environment](devenv/devenv.md)
