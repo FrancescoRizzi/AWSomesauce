@@ -1,2 +1,5 @@
 theme: jekyll-theme-leap-day
+title: AWSomesauce
+description: "AWS Tips, Tricks, and Solutions"
+show_downloads: "true"
 permalink: /404.html
