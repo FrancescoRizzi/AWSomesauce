@@ -1,6 +1,6 @@
 ---
 title: "LT1: Hello World"
-permalink: readme.html
+permalink: lt1.html
 ---
 
 # LT1: Hello World
@@ -15,7 +15,7 @@ We wish to develop a *"Hello World"* Lambda function: given a triggering event, 
 
 # hello_world Lambda
 
-Perhaps the simplest possible solution is a 1-liner handler: [hello_world_1.py](./lt1/hello_world_1.py)
+Perhaps the simplest possible solution is a 1-liner handler: [hello_world_1.py](hello_world_1.py)
 
 ```python
 {% include_relative hello_world_1.py %}

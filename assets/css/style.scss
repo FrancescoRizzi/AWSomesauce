@@ -37,3 +37,15 @@ ul {
 	list-style-image: url("../images/awsomesauce-bullet.png");
 }
 
+/* Code Highlighting (via Rogue)
+	================================================== */
+.highlight table tr {
+	vertical-align: top;
+}
+.highlight table td {
+	padding: 0;
+}
+.highlight table td.code {
+	max-width: 500px;
+}
+

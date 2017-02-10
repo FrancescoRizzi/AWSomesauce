@@ -13,7 +13,7 @@ bundle exec jekyll serve
 
 # Index
 * [Standard Development Environment](devenv/devenv.md)
-* [LT1: Hello World Lambda Template](lt1/README.md)
+* [LT1: Hello World](lt1/lt1.md)
 
 # Meta and Legalia
 AWSomesauce is published online via *Github Pages*, so:
