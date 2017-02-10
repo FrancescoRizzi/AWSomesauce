@@ -30,3 +30,10 @@
 	background-image: none;
 	background-color: #235796;
 }
+
+/* Override theme ul styling for bulletpoint image
+	================================================== */
+ul {
+	list-style-image: url("../images/awsomesauce-bullet.png");
+}
+
