@@ -1,5 +1,74 @@
-theme: jekyll-theme-leap-day
+# ============================================================
+# AWSomesauce/_config.yaml:
+#  Jekyll Configuration file for AWSomesauce
+# ============================================================
+# NOTE: 
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+# ============================================================
+
+# GitHub Pages overrides these settings, so we can't change them:
+# See: https://help.github.com/articles/configuring-jekyll/
+# ============================================================
+# lsi: false
+# safe: true
+# source: [your repo's top level directory]
+# incremental: false
+# highlighter: rouge
+# gist:
+#    noscript: false
+# kramdown:
+#    math_engine: mathjax
+# ============================================================
+
+# Site settings:
+# use via {{ site.varname }} (eg: site.title, site.email, ...)
+# ============================================================
 title: AWSomesauce
-description: "AWS Tips, Tricks, and Solutions"
+description: "AWSome solutions on or about the AWS cloud platform"
+email: francesco.rizzi@gmail.com
+twitter_username: FrancescoRizzi
+github_username:  FrancescoRizzi
+# baseurl: "" # the subpath of your site, e.g. /blog
+# url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: https://FrancescoRizzi.github.io/AWSomesauce
+
+# The appearance of AWSomesauce is based on the Leap Day theme
+# ============================================================
+# Leap-Day Theme is by Matt Graham, twitter @michigangraham.
+# See: https://github.com/mattgraham/leapday
+# ============================================================
+# The Leap-Day theme was obtained through the Leap-Day repository
+# maintained by Github's Pages-Themes.
+# See: https://github.com/pages-themes/leap-day
+# ============================================================
+# Theme configuration:
+# ============================================================
+theme: jekyll-theme-leap-day
+# show_downloads: ["true" or "false" to indicate whether to provide a download URL]
 show_downloads: "true"
+
+# Build settings
+# ============================================================
+markdown: kramdown
+
+# Kramdown settings:
+#  remember that this one is overridden by Github Pages:
+#     math_engine: mathjax
+# ============================================================
+kramdown:
+   input: GFM
+   syntax_highlighter: rogue
+   syntax_highlighter_opts:
+      css_class: 'highlight'
+      span:
+         line_numbers: false
+      block:
+         line_numbers: true
+         start_line: 1
+
+# Custom Error/404 page:
+# ============================================================
 permalink: /404.html
+
+

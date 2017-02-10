@@ -11,12 +11,13 @@ The Lambda function itself will simply log the event it receives, and return a s
 
 # The Use Case
 
-We wish to develop a *"Hello World"* Lambda function: given a triggering event, which *may* include a <name> argument, the function should return a salutation: *"Hello, <name>."*, using *"World"* if no <name> was provided.
+We wish to develop a *"Hello World"* Lambda function: given a triggering event, which *may* include a \<name> argument, the function should return a salutation: *"Hello, \<name>."*, using *"World"* if no \<name> was provided.
 
 # hello_world Lambda
 
 Perhaps the simplest possible solution is a Lambda function with a 1-liner handler, `hello_world_1.py`:
-```
+
+```python
 {% include_relative hello_world_1.py %}
 ```
 

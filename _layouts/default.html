@@ -16,7 +16,7 @@
   <body>
 
       <header class="masthead">
-        <h1 class="title"><a href="{{ site.baseurl }}">{{ site.title | default: site.github.repository_name }}</a></h1>
+        <h1 class="title"><a href="{{ site.url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
         <p>{{ site.description | default: site.github.project_tagline }}</p>
       </header>
 
@@ -47,7 +47,12 @@
         {% if site.github.is_project_page %}
           <p>Project maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
         {% endif %}
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+        <p>
+        	<small>Hosted on <a href="https://pages.github.com/">GitHub Pages</a>.</small><br />
+        	<small>Theme based on:</small><br />
+        	<small><a href="https://github.com/pages-themes/leap-day">Leap Day Theme</a>,</small><br />
+        	<small>by <a href="https://twitter.com/michigangraham">mattgraham</a></small>
+        </p>
       </footer>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->

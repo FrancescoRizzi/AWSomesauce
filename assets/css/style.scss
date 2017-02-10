@@ -7,11 +7,26 @@
 	================================================== */
 .masthead .title a,
 .masthead .title a:visited {
-	color: #f3f3f3;
+	display: block;
+	color: #fbfbfb; /* #f3f3f3; */
 	font-weight: normal;
 }
 .masthead .title a:hover,
 .masthead .title a:active {
-	color: #F0B500;
+	color: #ffcc00; /* #F0B500; */
+	
 }
-
+.masthead {
+	padding-top: 0;
+	padding-right: 0;
+	padding-bottom: 65px;
+	padding-left: 0;
+	/* width: auto; */
+}
+.masthead .title {
+	padding-top: 25px;
+}
+.masthead .title:hover {
+	background-image: none;
+	background-color: #235796;
+}
