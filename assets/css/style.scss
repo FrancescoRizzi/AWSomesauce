@@ -3,38 +3,133 @@
 
 @import "{{ site.theme }}";
 
-/* Override theme a styling for masthead title
+/* AWSomesauce Styles:
 	================================================== */
-.masthead .title a,
-.masthead .title a:visited {
-	display: block;
-	color: #fbfbfb; /* #f3f3f3; */
-	font-weight: normal;
+
+/* Common mixins:
+	================================================== */
+
+@mixin box-shadow($shadow...) {
+  -webkit-box-shadow: $shadow;
+     -moz-box-shadow: $shadow;
+          box-shadow: $shadow;
 }
-.masthead .title a:hover,
-.masthead .title a:active {
-	color: #ffcc00; /* #F0B500; */
-	
+
+@mixin border-radius($radius...) {
+  -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+          border-radius: $radius;
 }
+
+@mixin border-top-left-radius($radius...) {
+  -webkit-border-top-left-radius: $radius;
+     -moz-border-radius-topleft:  $radius;
+          border-top-left-radius: $radius;
+}
+
+@mixin border-top-right-radius($radius...) {
+  -webkit-border-top-right-radius: $radius;
+     -moz-border-radius-topright:  $radius;
+          border-top-right-radius: $radius;
+}
+
+@mixin transition($transition...) {
+  -webkit-transition: $transition;
+     -moz-transition: $transition;
+       -o-transition: $transition;
+          transition: $transition;
+}
+
+@mixin user-select($select...) {
+  -webkit-user-select: $select;    /* Chrome all / Safari all */
+     -moz-user-select: $select;    /* Firefox all */
+      -ms-user-select: $select;    /* IE 10+ */
+       -o-user-select: $select;
+          user-select: $select;
+}
+
+
+/* links: a:hover, a:active
+	Overrides Leap-Day styles
+	================================================== */
+a:hover,
+a:active {
+	text-decoration: underline;
+}
+
+/* nav:
+	sidebar in-page navigation
+	Overrides Leap-Day styles
+	================================================== */
+nav ul {
+	a,
+	li.tag-h1 a {
+		color: #333333;
+
+		&:hover {
+			color: #3399cc;
+		}
+	}
+}
+
+/* masthead title
+	Overrides Leap-Day styles
+	================================================== */
 .masthead {
 	padding-top: 0;
 	padding-right: 0;
-	padding-bottom: 65px;
+	/* padding-bottom: 65px; */
 	padding-left: 0;
-	/* width: auto; */
-}
-.masthead .title {
-	padding-top: 25px;
-}
-.masthead .title:hover {
-	background-image: none;
-	background-color: #235796;
+
+	.title {
+		padding-top: 25px;
+
+		&:hover {
+			background-image: none;
+			background-color: #235796;
+		}
+
+		a,
+		a:visited {
+			display: block;
+			color: #fbfbfb;
+			font-weight: normal;
+		}
+		a:hover,
+		a:active {
+			color: #ffcc00;
+			text-decoration: none;
+		}
+	}
 }
 
-/* Override theme ul styling for bulletpoint image
+@media (min-width: 481px) {
+	.masthead {
+		padding-bottom: 65px;
+	}
+}
+
+
+
+
+/* ul bulletpoint
+	Overrides Leap-Day styles
 	================================================== */
 ul {
 	list-style-image: url("../images/awsomesauce-bullet.png");
+}
+
+/* #breadcrumbs
+	Site Breadcrumbs
+	================================================== */
+ul#breadcrumbs {
+	padding: 0;
+}
+#breadcrumbs li {
+	display: inline-block;
+	padding-left: 10px;
+	padding-right: 10px;
+	background: transparent url("../images/awsomesauce-bullet.png") no-repeat center left;
 }
 
 /* Code Highlighting (via Rogue)
@@ -48,4 +143,203 @@ ul {
 .highlight table td.code {
 	max-width: 500px;
 }
+
+/* Notes
+	Based on the notes styles from Jekyll's website ( https://jekyllrb.com/docs/home/ )
+	================================================== */
+.note {
+	margin: 30px 0;
+	margin-right: -15px;
+	margin-left: -15px;
+
+	padding: 20px 20px 24px;
+	padding-left: 60px;
+
+	@include border-radius(5px 5px 5px 5px);
+	position: relative;
+	@include box-shadow(0 1px 5px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(0,0,0,.3));
+
+	background-color: #7e6d42;
+	background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzdlNmQ0MiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM1YzRlMzUiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#7e6d42), to(#5c4e35));
+	background-image: -webkit-linear-gradient(top, #7e6d42 0%, #5c4e35 100%);
+	background-image: -moz-linear-gradient(top, #7e6d42 0%, #5c4e35 100%);
+	background-image: -o-linear-gradient(top, #7e6d42 0%, #5c4e35 100%);
+	background-image: linear-gradient(to bottom, #7e6d42 0%,#5c4e35 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7e6d42', endColorstr='#5c4e35',GradientType=0 );
+
+	color: #ffffff;
+
+	a,
+	a:visited {
+		color: #fc0; /* #333333; */
+	}
+
+}
+
+@media (min-width: 721px) {
+	.note {
+		@include border-radius(0 5px 5px 0);
+		margin-left: -40px;
+		margin-right: 0;
+
+		&:before {
+			content: "";
+			position: absolute;
+			top: -10px;
+			left: 0;
+			border-color: transparent #222 #222 transparent;
+			border-style: solid;
+			border-width: 5px;
+			width: 0;
+			height: 0;
+		}
+	}
+}
+
+.note {
+
+	h5,
+	p {
+		margin: 0;
+		color: #fff;
+	}
+
+	h5 {
+		line-height: 1.5em;
+		font-weight: 900;
+		font-style: bold;
+		font-size: 1.17em;	/* NOTE: this matches the 'standard' font-size for h3 */
+	}
+
+	p {
+		font-weight: 400;
+		font-size: 1em;
+	}
+
+	&:after {
+		content: '\2605';
+		color: #fc0;
+		position: absolute;
+		/* top: 14px; */
+		top: 24px;
+		left: 14px;
+		font-size: 28px;
+		font-weight: 700;
+		text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+	}
+}
+
+.info {
+	background-color: #0389aa;
+	background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzAzODlhYSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMDYxN2YiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#0389aa), to(#00617f));
+	background-image: -webkit-linear-gradient(top, #0389aa 0%, #00617f 100%);
+	background-image: -moz-linear-gradient(top, #0389aa 0%, #00617f 100%);
+	background-image: -o-linear-gradient(top, #0389aa 0%, #00617f 100%);
+	background-image: linear-gradient(to bottom, #0389aa 0%,#00617f 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0389aa', endColorstr='#00617f',GradientType=0 );
+}
+
+.warning {
+	background-color: #9e2812;
+	background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzllMjgxMiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2ZjBkMGQiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#9e2812), to(#6f0d0d));
+	background-image: -webkit-linear-gradient(top, #9e2812 0%, #6f0d0d 100%);
+	background-image: -moz-linear-gradient(top, #9e2812 0%, #6f0d0d 100%);
+	background-image: -o-linear-gradient(top, #9e2812 0%, #6f0d0d 100%);
+	background-image: linear-gradient(to bottom, #9e2812 0%,#6f0d0d 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9e2812', endColorstr='#6f0d0d',GradientType=0 );
+}
+
+.unreleased {
+	background-color: #cd9239;
+	background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2NkOTIzOSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNhMjc1MjgiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(205,146,57,1)), to(rgba(162,117,40,1)));
+	background-image: -webkit-linear-gradient(top, rgba(205,146,57,1) 0%, rgba(162,117,40,1) 100%);
+	background-image: -moz-linear-gradient(top, rgba(205,146,57,1) 0%, rgba(162,117,40,1) 100%);
+	background-image: -o-linear-gradient(top, rgba(205,146,57,1) 0%, rgba(162,117,40,1) 100%);
+	background-image: linear-gradient(to bottom, rgba(205,146,57,1) 0%,rgba(162,117,40,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cd9239', endColorstr='#a27528',GradientType=0 );
+}
+
+.os {
+	background-color: #c0c0c0;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(192,192,192,1)), to(rgba(43,42,18,1)));
+	background-image: -webkit-linear-gradient(top, rgba(192,192,192,1) 0%, rgba(43,42,18,1) 100%);
+	background-image: -moz-linear-gradient(top, rgba(192,192,192,1) 0%, rgba(43,42,18,1) 100%);
+	background-image: -o-linear-gradient(top, rgba(192,192,192,1) 0%, rgba(43,42,18,1) 100%);
+	background-image: linear-gradient(to bottom, rgba(192,192,192,1) 0%,rgba(43,42,18,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c0c0c0', endColorstr='#2b2a12',GradientType=0 );
+}
+
+.info:before { border-color: transparent #00617f #00617f transparent; }
+.warning:before { border-color: transparent #6f0d0d #6f0d0d transparent; }
+.unreleased:before { border-color: transparent #664719 #664719 transparent; }
+/* .os:before { border-color: transparent #eae6d1 #2b2a12 transparent; } */
+
+.info:after {
+	content: '\24D8';
+	color: #fff;
+	position: absolute;
+	top: 24px;
+	/* top: 15px; */
+	left: 14px;
+	font-size: 28px;
+	font-weight: 700;
+	text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+}
+
+.warning:after {
+	content: '\203C';
+	color: #fc0;
+	position: absolute;
+	top: 24px;
+	/* top: 15px; */
+	left: 14px;
+	font-size: 32px;
+	font-weight: 700;
+	text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+}
+
+.unreleased:after {
+	content: '\2692';
+	color: #2b2a12;
+	position: absolute;
+	top: 24px;
+	/* top: 8px; */
+	left: 14px;
+	font-size: 38px;
+	font-weight: 700;
+	text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
+.os:after {
+	content: ' ';
+	background: transparent url("../images/desktop.png") no-repeat center left;
+	position: absolute;
+	top: 24px;
+	left: 14px;
+	min-width: 1em;
+	min-height: 1em;
+	font-size: 38px;
+	font-weight: 700;
+	text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
+.os.mac:after {
+	content: ' ';
+	background: transparent url("../images/mac_os.png") no-repeat center left;
+	position: absolute;
+	top: 24px;
+	left: 14px;
+	min-width: 1em;
+	min-height: 1em;
+	font-size: 38px;
+	font-weight: 700;
+	text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
+/* 	background: transparent url("../images/mac_os.png") no-repeat center left; */
+
 

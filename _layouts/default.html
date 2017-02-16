@@ -1,74 +1,104 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>{{ site.title | default: site.github.repository_name }} by {{ site.github.owner_name }}</title>
-    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="chrome=1">
+	<title>{{ site.title | default: site.github.repository_name }} by {{ site.github.owner_name }}</title>
+	<link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+	<!--[if lt IE 9]>
+		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body>
+	<header class="masthead">
+		<h1 class="title"><a href="{{ site.url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
+		<p>{{ site.description | default: site.github.project_tagline }}</p>
+	</header>
 
-  </head>
-  <body>
+	<div id="banner">
+		<span id="logo"></span>
+		<a href="{{ site.github.repository_url }}" class="button fork"><strong>View On GitHub</strong></a>
+		{% if site.show_downloads %}
+		<div class="downloads">
+			<span>Downloads:</span>
+			<ul>
+				<li><a href="{{ site.github.zip_url }}" class="button">ZIP</a></li>
+				<li><a href="{{ site.github.tar_url }}" class="button">TAR</a></li>
+			</ul>
+		</div>
+		{% endif %}
+	</div><!-- end banner -->
 
-      <header class="masthead">
-        <h1 class="title"><a href="{{ site.url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
-        <p>{{ site.description | default: site.github.project_tagline }}</p>
-      </header>
+	<div class="wrapper">
+		<!-- NOTE: This <nav> with <ul> is used for automated intrapage breadcrumbs -->
+		<nav>
+			<ul></ul>
+		</nav>
 
-      <div id="banner">
-        <span id="logo"></span>
+		<section>
+			<!-- NOTE: semantically this should be wrapped in a <nav> but
+					the theme is currently liberal in styling ALL <nav>s as
+					the automated intra-page navigation breadcrumbs (above)
+					and that's now desired in this case -->
+			<div id="breadcrumbs-wrapper">
+				<ul id="breadcrumbs">
+					{% capture page_url_without_index_html %}{{ page.url | remove: "/index.html" }}{% endcapture %}
 
-        <a href="{{ site.github.repository_url }}" class="button fork"><strong>View On GitHub</strong></a>
-        {% if site.show_downloads %}
-          <div class="downloads">
-            <span>Downloads:</span>
-            <ul>
-              <li><a href="{{ site.github.zip_url }}" class="button">ZIP</a></li>
-              <li><a href="{{ site.github.tar_url }}" class="button">TAR</a></li>
-            </ul>
-          </div>
-        {% endif %}
-      </div><!-- end banner -->
+					{% if site.baseurl != page_url_without_index_html %}
+						<li><a href="{{ site.baseurl }}/">Home</a></li>
+					{% endif %}
 
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
-        {{ content }}
+					{% assign splitted_url_parts = page_url_without_index_html | split: '/' %}
+					{% capture forLoopMaxInt %}{{ splitted_url_parts.size | minus:1 }}{% endcapture %}
+					{% for i in (1..forLoopMaxInt) %}
+						{% capture current_breadcrumb_url %}{{next_prepender}}/{{ splitted_url_parts[i] }}/index.html{% endcapture %}
+						{% capture current_breadcrumb_md_url %}{{next_prepender}}/{{ splitted_url_parts[i] }}/{% endcapture %}
+						{% capture next_prepender %}{{next_prepender}}/{{ splitted_url_parts[i] }}{% endcapture %}
+						{% for breadcrumb_page in site.pages %}
+							{% if current_breadcrumb_url == breadcrumb_page.url or current_breadcrumb_md_url == breadcrumb_page.url  %}
+								{% assign j = forLoopMaxInt | plus: 0 %}
+								{% if i != j %}
+									<li>
+										{% capture breadcrumb_page_page_url_without_index_html %}{{ breadcrumb_page.url | remove: "index.html" }}{% endcapture %}
+										<a href="{{ site.baseurl }}{{breadcrumb_page_page_url_without_index_html}}">{{breadcrumb_page.title}}</a>
+									</li>
+								{% endif %}
+							{% endif %}
+						{% endfor %}
+					{% endfor %}
+				</ul>
+			</div>
 
-      </section>
-      <footer>
-        {% if site.github.is_project_page %}
-          <p>Project maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
-        {% endif %}
-        <p>
-        	<small>Hosted on <a href="https://pages.github.com/">GitHub Pages</a>.</small><br />
-        	<small>Theme based on:</small><br />
-        	<small><a href="https://github.com/pages-themes/leap-day">Leap Day Theme</a>,</small><br />
-        	<small>by <a href="https://twitter.com/michigangraham">mattgraham</a></small>
-        </p>
-      </footer>
-    </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+			{{ content }}
+		</section>
+		<footer>
+			{% if site.github.is_project_page %}
+			<p>Project maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
+			{% endif %}
+			<p>
+				<small>Hosted on <a href="https://pages.github.com/">GitHub Pages</a>.</small><br />
+				<small>Theme based on:</small><br />
+				<small><a href="https://github.com/pages-themes/leap-day">Leap Day Theme</a>,</small><br />
+				<small>by <a href="https://twitter.com/michigangraham">mattgraham</a></small>
+			</p>
+		</footer>
+	</div>
+	<!--[if !IE]><script>fixScale(document);</script><![endif]-->
 
-    {% if site.google_analytics %}
-      <script type="text/javascript">
-        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-      </script>
-      <script type="text/javascript">
-        try {
-          var pageTracker = _gat._getTracker("{{ site.google_analytics }}");
-        pageTracker._trackPageview();
-        } catch(err) {}
-      </script>
-    {% endif %}
-
-  </body>
+	{% if site.google_analytics %}
+	<script type="text/javascript">
+		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+		document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+		try {
+			var pageTracker = _gat._getTracker("{{ site.google_analytics }}");
+			pageTracker._trackPageview();
+		} catch(err) {}
+	</script>
+	{% endif %}
+</body>
 </html>

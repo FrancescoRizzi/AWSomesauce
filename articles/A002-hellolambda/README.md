@@ -1,9 +1,9 @@
 ---
-title: "LT1: Hello World"
-permalink: readme.html
+title: "A002 - Hello Lambda"
+permalink: /articles/a002-hellolambda/index.html
 ---
 
-# LT1: Hello World
+# A002 - Hello Lambda
 
 A simple template for simple scenarios: consider this the *"Getting Started"* template, a tad more than what you get in the official [AWS Lambda Developer Guide: Getting Started](http://docs.aws.amazon.com/lambda/latest/dg/getting-started.html).
 
@@ -15,7 +15,7 @@ We wish to develop a *"Hello World"* Lambda function: given a triggering event, 
 
 # hello_world Lambda
 
-Perhaps the simplest possible solution is a 1-liner handler: [hello_world_1.py](./lt1/hello_world_1.py)
+Perhaps the simplest possible solution is a 1-liner handler: [hello_world_1.py](./hello_world_1.py)
 
 ```python
 {% include_relative hello_world_1.py %}
