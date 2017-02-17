@@ -7,19 +7,19 @@ permalink: index.html
 
 A project to capture and share tips, tricks, snipplets, and solutions built on or around the [Amazon Web Services (AWS)](https://aws.amazon.com/) cloud platform.
 
-# Just Getting Started
+## Just Getting Started
 
 Not much to see here (yet).
 
-# Build/Run Instructions
+## Build/Run Instructions
 
 #TODO: clone from github and then? How to set a virtualenv, and run the unit tests or other parts?
 bundle exec jekyll serve
 
-# Index
+## Index
 * [Index of Articles](articles/README.md)
 
-# Meta and Legalia
+## Meta and Legalia
 AWSomesauce is published online via *Github Pages*, so:
 
 * It is a *static site* hosted by [Github Pages](https://pages.github.com/), an awesome hosting provider integrated with their primary project repository service.

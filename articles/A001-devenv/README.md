@@ -40,15 +40,25 @@ different development environments.
    <p>If you're using Python on a Mac, I reccommend reading <a href="https://docs.python.org/2.7/using/mac.html">Using Python on a Macintosh</a> to avoid working on an environment that will at some point force you to start over.</p>
 </div>
 
-## Additional Python Tools
+## Additional Tools
 
+* [AWS CLI](https://aws.amazon.com/cli/): the AWS-authored library to interact with AWS from your command-line; see the official documentation on:
+   * [Getting Set Up with the AWS Command Line Interface](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html)
+   * [Configuring the AWS Command Line Interface](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
 * [virtualenv](https://virtualenv.pypa.io/en/stable/) installed globally
 * virtualenvwrapper installed globally, which means:
    * (Mac): [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
    * (Win): [virtualenvwrapper-win](https://pypi.python.org/pypi/virtualenvwrapper-win)
-* [Boto3](https://boto3.readthedocs.io/en/latest/)
-* [AWS CLI](https://aws.amazon.com/cli/): Always handy
+* Set up AWSomesauce as a virtual environment, eg:
+   * `%> mkproject AWSomesauce` (or whatever project name you wish to use)
+   * `%> setvirtualenvproject \<path/to/AWSomesauce>`
+   * `%> cdproject`
+* Install dependencies within the AWSomesauce virtual environment:
+   * `pip install -r requirements.txt`
 
+Among the dependencies listed in [requirements.txt](./requirements.txt), there's one worth mentioning from the get-go:
+
+* [Boto3](https://boto3.readthedocs.io/en/latest/): This is an AWS-authored Python package providing an easy-to-use programmatic API from your code to interact with AWS. Semantically, it is similar to the afore-mentioned AWS CLI, and our programs will use it wherever they need to submit requests to any of the AWS services.
 
 ## Test/Code Editor
 

@@ -48,6 +48,11 @@
           user-select: $select;
 }
 
+/* center:
+	================================================== */
+.center {
+	text-align: center;
+}
 
 /* links: a:hover, a:active
 	Overrides Leap-Day styles
@@ -109,9 +114,6 @@ nav ul {
 	}
 }
 
-
-
-
 /* ul bulletpoint
 	Overrides Leap-Day styles
 	================================================== */
@@ -144,6 +146,27 @@ ul#breadcrumbs {
 	max-width: 500px;
 }
 
+/* Inline <code>
+	Overrides Leap-Day styles
+	================================================== */
+
+code {
+	background-color: #333;
+	color: #d0d0d0;
+	margin: 0;
+
+	/*
+	font-family: 'Lucida Sans', Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal;
+	font-size:13px;
+	color:#efefef;
+	text-shadow: 0px 1px 0px #000;
+	margin: 0 4px;
+	padding: 2px 6px;
+	background: #333;
+	border-radius: 2px;
+	*/
+}
+
 /* Notes
 	Based on the notes styles from Jekyll's website ( https://jekyllrb.com/docs/home/ )
 	================================================== */
@@ -169,12 +192,6 @@ ul#breadcrumbs {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7e6d42', endColorstr='#5c4e35',GradientType=0 );
 
 	color: #ffffff;
-
-	a,
-	a:visited {
-		color: #fc0; /* #333333; */
-	}
-
 }
 
 @media (min-width: 721px) {
@@ -198,7 +215,6 @@ ul#breadcrumbs {
 }
 
 .note {
-
 	h5,
 	p {
 		margin: 0;
@@ -217,11 +233,15 @@ ul#breadcrumbs {
 		font-size: 1em;
 	}
 
+	a,
+	a:visited {
+		color: #fc0;
+	}
+
 	&:after {
 		content: '\2605';
 		color: #fc0;
 		position: absolute;
-		/* top: 14px; */
 		top: 24px;
 		left: 14px;
 		font-size: 28px;
@@ -251,6 +271,9 @@ ul#breadcrumbs {
 	background-image: linear-gradient(to bottom, #9e2812 0%,#6f0d0d 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9e2812', endColorstr='#6f0d0d',GradientType=0 );
 }
+.warning strong {
+	color: #fc0;
+}
 
 .unreleased {
 	background-color: #cd9239;
@@ -261,6 +284,16 @@ ul#breadcrumbs {
 	background-image: -o-linear-gradient(top, rgba(205,146,57,1) 0%, rgba(162,117,40,1) 100%);
 	background-image: linear-gradient(to bottom, rgba(205,146,57,1) 0%,rgba(162,117,40,1) 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cd9239', endColorstr='#a27528',GradientType=0 );
+}
+
+.tangent {
+	background-color: #427480;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#427480), to(#29616E));
+	background-image: -webkit-linear-gradient(top, #427480 0%, #29616E 100%);
+	background-image: -moz-linear-gradient(top, #427480 0%, #29616E 100%);
+	background-image: -o-linear-gradient(top, #427480 0%, #29616E 100%);
+	background-image: linear-gradient(to bottom, #427480 0%,#29616E 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#427480', endColorstr='#29616E',GradientType=0 );
 }
 
 .os {
@@ -276,7 +309,7 @@ ul#breadcrumbs {
 .info:before { border-color: transparent #00617f #00617f transparent; }
 .warning:before { border-color: transparent #6f0d0d #6f0d0d transparent; }
 .unreleased:before { border-color: transparent #664719 #664719 transparent; }
-/* .os:before { border-color: transparent #eae6d1 #2b2a12 transparent; } */
+.tangent:before { border-color: transparent #29616E #29616E transparent; }
 
 .info:after {
 	content: '\24D8';
@@ -314,6 +347,19 @@ ul#breadcrumbs {
 	text-shadow: 0 1px 0 rgba(255,255,255,.25);
 }
 
+.tangent:after {
+	content: ' ';
+	background: transparent url("../images/roadsplit.png") no-repeat center left;
+	position: absolute;
+	top: 24px;
+	left: 14px;
+	min-width: 1em;
+	min-height: 1em;
+	font-size: 38px;
+	font-weight: 700;
+	text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
 .os:after {
 	content: ' ';
 	background: transparent url("../images/desktop.png") no-repeat center left;
@@ -340,6 +386,5 @@ ul#breadcrumbs {
 	text-shadow: 0 1px 0 rgba(255,255,255,.25);
 }
 
-/* 	background: transparent url("../images/mac_os.png") no-repeat center left; */
 
 
