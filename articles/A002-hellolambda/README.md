@@ -1,6 +1,6 @@
 ---
 title: "A002 - Hello Lambda"
-permalink: /articles/a002-hellolambda/index.html
+permalink: /articles/A002-hellolambda/index.html
 ---
 
 # A002 - Hello Lambda

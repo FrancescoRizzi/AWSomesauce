@@ -1,6 +1,6 @@
 ---
 title: "A001 - Development Environment"
-permalink: /articles/a001-devenv/index.html
+permalink: /articles/A001-devenv/index.html
 ---
 
 # A001 - Development Environment
