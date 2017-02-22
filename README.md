@@ -7,15 +7,6 @@ permalink: index.html
 
 A project to capture and share tips, tricks, snipplets, and solutions built on or around the [Amazon Web Services (AWS)](https://aws.amazon.com/) cloud platform.
 
-## Just Getting Started
-
-Not much to see here (yet).
-
-## Build/Run Instructions
-
-#TODO: clone from github and then? How to set a virtualenv, and run the unit tests or other parts?
-bundle exec jekyll serve
-
 ## Index
 * [Index of Articles](articles/README.md)
 

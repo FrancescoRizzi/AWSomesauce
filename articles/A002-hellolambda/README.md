@@ -13,7 +13,7 @@ The Lambda function itself will simply log the event it receives, and return a s
 
 We wish to develop a *"Hello World"* Lambda function: given a triggering event, which *may* include a *\<name>* argument, the function should return a salutation (*"Hello, \<name>."*), using *"World"* if no *\<name>* was provided.
 
-## hello_world
+## hello_world Lambda
 
 Perhaps the simplest possible solution is a 1-liner handler: [hello_world_1.py](./hello_world_1.py)
 
@@ -181,7 +181,7 @@ Now that we deployed *hello_world* as a Lambda function on AWS, we can perform s
 
 For our simple use case, and simple function, this can all be tested through a simple manual process accessible through the AWS Web Console.
 
-Once again, the official [AWS Lambda Developer Guide](http://docs.aws.amazon.com/lambda/latest/dg/welcome.html) includes a good reference for this process as [Step 2.2: Invoke the Lambda Function Manually and Verify Results, Logs, and Metrics](http://docs.aws.amazon.com/lambda/latest/dg/get-started-invoke-manually.html). You cna follow those steps, using the following Input test events in step 2:
+Once again, the official [AWS Lambda Developer Guide](http://docs.aws.amazon.com/lambda/latest/dg/welcome.html) includes a good reference for this process as [Step 2.2: Invoke the Lambda Function Manually and Verify Results, Logs, and Metrics](http://docs.aws.amazon.com/lambda/latest/dg/get-started-invoke-manually.html). You can follow those steps, using the following Input test events in step 2:
 
 | Test         | Input Event            | Expected Output                     |
 | ------------ | ---------------------  | ----------------------------------- |
@@ -202,7 +202,7 @@ Let's start with the blurb from the [AWS API Gateway Page](https://aws.amazon.co
 
 > Amazon API Gateway is a fully managed service that makes it easy for developers to create, publish, maintain, monitor, and secure APIs at any scale.
 
-That may sound vague, but to be fair, it's because API Gateway can do, or at least enable, a lot of stuff. It's sort of open-ended, because it is designed as a routing mechanism from incoming HTTP requests to.. a handler of some sort. For instance, you could set it up so that properly formatted requests, describing a data entity, can be routed to a database table in your AWS DynamoDB, and insert a new record.
+That may sound vague, but to be fair it's because API Gateway can do, or at least enable, a lot of stuff. It's sort of open-ended, because it is designed as a routing mechanism from incoming HTTP requests to.. a handler of some sort. For instance, you could set it up so that properly formatted requests, describing a data entity, can be routed to a database table in your AWS DynamoDB, and insert a new record.
 
 In our case, we'll route the requests to be served by the *hello_world* Lambda we deployed. When used in this role, I think of API Gateway as the *hosting* and *routing* front-end to expose your Lambda functions as HTTP API/Endpoints. Let's see what we need to do to set up API gateway so that requests to a certain URL are routed to our *hello_world* function.
 
@@ -257,19 +257,33 @@ The Test page for an API Gateway method provides fields to let you enter any of 
 
 | Test         | X-Name        | Expected Output                     |
 | ------------ | ------------- | ----------------------------------- |
-| No \<name>   | *leave blank* | `{ "salutation": "Hello, ."}`       |
+| No \<name>   | *leave blank* | `{ "salutation": "Hello, World."}`  |
 | With \<name> | `Lambda`      | `{ "salutation": "Hello, Lambda."}` |
 
-<div class="note warning">
-   <h5>What happened to the world?</h5>
-   <p>You may be surprised by the expected results in the *No \<name>* test, as it does not include the default **World** name we've been using before.<br />
-   This is because of a **limitation** ???? #TODO
-   </p>
-</div>
+## Deploying the API
+
+Our simple system is in place:
+
+* The *hello_world* Lambda Function is deployed to AWS Lambda
+* The *helloWorldAPI* API is configured on AWS API Gateway, with a */hw* Resource, with a *GET* method redirecting to the Lambda function
+
+All we need to do now is to Deploy the API (in AWS API Gateway) to a **Stage** so that the */hw* HTTP endpoint is available to the public for use outside of the AWS Web Console.
+
+The official developer guide [on Deploying an API in Amazon API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-deploy-api.html) provides lots of informations on the various options available to your solution. For our current simple scenario, we don't need to worry about most of these, but we can simply deploy using the AWS Web Console (*sigh*, another Manual Operation) as follows:
+
+* In the AWS Web Console, Amazon API Gateway service pages, in the left-hand side navigation menu, select:
+   * APIs > helloworldAPI > Resources
+   * In the list of Resources for the API, select the **root** Resource ('/')
+* From the 'Actions' drop-down button, select **Deploy API**
+* In the 'Deploy API' dialog:
+   * 'Deployment stage': select `[New Stage]`
+   * 'Stage Name': enter a stage name (eg: `hwdev`)
+   * Click on the 'Deploy' button
+
+AWS deploys the API to the new stage, and will display at the top of the page the URL for the deployed solution, eg: Invoke URL: https://*\<GUID>*.execute-api.us-east-1.amazonaws.com/hwdev
+
+You can use this URL to reach your service and submit requests to it (eg: via a web browser, or via Curl), but remember to add the resource name in the URL (eg: https://*\<GUID>*.execute-api.us-east-1.amazonaws.com/hwdev**/hw**), and, of course, if you wish to submit a \<name> argument, send it via the `X-Name` HTTP Header.
 
 
-
-
-## More testing?
 
 

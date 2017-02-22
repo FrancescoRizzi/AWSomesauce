@@ -29,6 +29,15 @@ class TestHelloWorld3(unittest.TestCase):
         actual = hello_world_3.lambda_handler(event, {})
         self.assertEqual(expected, actual)
 
+    def test_lambda_handler_uses_World_when_name_is_blank(self):
+        event = { "name": "" }
+
+        expected = {'salutation': "Hello, {0!s}.".format('World') }
+        expected_info = "Triggered by event: {0!s}".format(json.dumps(event, indent=2))
+
+        actual = hello_world_3.lambda_handler(event, {})
+        self.assertEqual(expected, actual)
+
 
 if __name__ == '__main__':
     unittest.main()
