@@ -23,7 +23,7 @@
 #
 # ============================================================
 
-PROFILE="syncservice"
+PROFILE="your_aws_profile"
 LBUCKET="sws.lambdas"
 SWSID="swsdev"
 STACKNAME="SWSStack"
