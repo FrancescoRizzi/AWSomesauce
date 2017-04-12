@@ -1,0 +1,87 @@
+# ============================================================
+# swa_cfn.yaml
+# ============================================================
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+# ============================================================
+   SWABucket:
+      Type: "String"
+      Description: "Name of the S3 Bucket hosting the web app"
+      #Default: "swa.site"
+      #ConstraintDescription: "At least 3 characters; only lowercase letters, digits (a-z0-9) and period (.)"
+      #AllowedPattern: "[a-z0-9\\.]+"
+      #MinLength: 1
+
+   SWACloudFrontOAI:
+      Type: "String"
+      Description: "CloudFront Distribution Origin Access Identity"
+      #Default: ""
+      #ConstraintDescription: "Required"
+      #MinLength: 1
+
+   SWADomainAlias:
+      Type: "String"
+      Description: "Domain Alias for the CloudFront Distribution"
+
+Resources:
+# ============================================================
+   SWACloudFrontDistribution:
+      Type: "AWS::CloudFront::Distribution"
+      Properties:
+         DistributionConfig:
+            Comment: "CloudFront Web Distribution for SWA"
+            Enabled: "true"
+            Aliases: [ "Ref": "SWADomainAlias" ]
+            # CacheBehaviors
+            # Comment
+            # CustomErrorResponses
+            # DefaultCacheBehavior
+            # HttpVersion
+            # Logging
+            Origins:
+               -
+                  Id: SWAOrigin
+                  DomainName: { "Fn::Join": [".", [ "Ref": "SWABucket", "s3.amazonaws.com" ] ] }
+                  # CustomOriginConfig | S3OriginConfig
+                  S3OriginConfig:
+                     OriginAccessIdentity: { "Fn::Join": ["/", [ "origin-access-identity/cloudfront", "Ref": "SWACloudFrontOAI" ] ] }
+                  # OriginCustomHeaders
+                  # OriginPath
+            DefaultRootObject: "index.html"
+            DefaultCacheBehavior:
+               TargetOriginId: "SWAOrigin"
+               AllowedMethods:
+                  #- DELETE
+                  - GET
+                  - HEAD
+                  #- OPTIONS
+                  #- PATCH
+                  #- POST
+                  #- PUT
+               ForwardedValues:
+                  # Cookies
+                  # Headers
+                  QueryString: "false"
+                  # QueryStringCacheKeys
+               ViewerProtocolPolicy: "redirect-to-https" # allow-all  # allow-all | redirect-to-https | https-only
+               # CachedMethods
+               # Compress
+
+               # DefaultTTL
+               # MinTTL
+               # MaxTTL
+               
+               # SmoothStreaming
+               # TrustedSigners
+            PriceClass: "PriceClass_100"
+            # Restrictions
+            ViewerCertificate:
+               CloudFrontDefaultCertificate: "true"
+            # WebACLId
+
+Outputs:
+# ============================================================
+   SWADomain:
+      Description: "SWADomain"
+      Value: { "Fn::GetAtt": ["SWACloudFrontDistribution", "DomainName"] }

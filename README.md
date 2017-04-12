@@ -28,3 +28,9 @@ All that being said, the **contents** of AWSomesauce (text, images, other media)
 
 * AWSomesauce is published under [the MIT License](LICENSE.md)
 
+
+### Note:
+If you grab all of this repo from GitBug and have a Jekyll setup locally, you can run it through the standard
+
+* `$> bundle exec jekyll serve`
+

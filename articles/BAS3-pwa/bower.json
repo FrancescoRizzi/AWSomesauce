@@ -1,0 +1,25 @@
+{
+  "name": "swa",
+  "version": "0.0.1",
+  "authors": [],
+  "description": "",
+  "license": "TODO",
+  "homepage": "TODO",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.6.3",
+    "angular-ui-router": "^0.4.2",
+    "adal-angular": "^1.0.14"
+  },
+  "devDependencies": {
+    "sass-material-colors": "^0.0.5",
+    "normalize-scss": "normalize.scss#^6.0.0"
+  }
+}

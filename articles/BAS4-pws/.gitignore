@@ -1,0 +1,11 @@
+# .gitignore
+# ========================================
+
+# We usually don't commit the results of a build
+# ========================================
+
+*.zip
+sws_cfn_packaged.yaml
+
+
+

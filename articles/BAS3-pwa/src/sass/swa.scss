@@ -1,0 +1,167 @@
+/* swa.scss
+	SASS Styles for SWA
+	************************************************** */
+
+/*	Imports:
+	************************************************** */
+@import "bower_components/normalize-scss/sass/normalize/import-now";
+@import 'bower_components/sass-material-colors/sass/sass-material-colors';
+
+/*	COLORS CODES
+	************************************************** */
+/*
+	COLORS: Primary and Accents
+	$CP<x><s>
+		<x>: Palette Code
+				0: 	Primary Color
+				1: 	Accent 1
+				2: 	Accent 2
+		<s>: Shade
+				L: 	Light
+				M: 	Medium
+				D: 	Dark
+	************************************************** */
+
+$CP0L: 	material-color('blue-grey', '500');
+$CP0M: 	material-color('blue-grey', '700');
+$CP0D: 	material-color('blue-grey', '900');
+
+$CP1L: 	material-color('deep-orange', 'a100');
+$CP1M: 	material-color('deep-orange', 'a400');
+$CP1D: 	material-color('deep-orange', 'a700');
+
+$WHITE: 		#FFFFFF;
+$WHITE2: 	material-color('grey', '50');
+$WHITE3: 	material-color('grey', '300');
+$BLACK3: 	material-color('grey', '600');
+$BLACK2: 	material-color('grey', '900');
+$BLACK: 		#000000;
+
+/*	Typography
+	************************************************** */
+$FSBASE:			14px;
+$FS1:				36px;
+$FS2:				30px;
+$FS3:				24px;
+$FS4:				18px;
+$FS5:				$FSBASE;
+$FS6:				12px;
+
+h1 { font-size: $FS1; }
+h2 { font-size: $FS2; }
+h3 { font-size: $FS3; }
+h4 { font-size: $FS4; }
+h5 { font-size: $FS5; }
+h6 { font-size: $FS6; }
+
+h1,
+h2 {
+	margin: 0;
+}
+
+/*	Paddings
+	************************************************** */
+$PADBASE:		8px;
+$MARBASE: 		8px;
+
+/*	Structural
+	************************************************** */
+body {
+	background-color: $CP0M;
+	color: $WHITE3;
+
+	font-size: $FSBASE;
+
+	a {
+		&:link,
+		&:visited {
+			color: $CP1L;
+			text-decoration: none;
+		}
+		&:hover {
+			color: $CP1M;
+			text-decoration: underline;
+		}
+		&:active {
+			color: $CP1D;
+			text-decoration: underline;
+		}
+	}
+}
+
+/*	Scopebox
+	************************************************** */
+.scopebox {
+	border: 1px solid $CP0D;
+
+	.title {
+		display: block;
+		background-color: $CP0D;
+		color: $WHITE3;
+		padding: $PADBASE;
+	}
+	.content {
+		padding: $PADBASE;
+	}
+
+}
+#RootView,
+#ShellView {
+	margin: $MARBASE;
+}
+
+/*	Tracepad
+	************************************************** */
+.tracepad {
+	display: block;
+	min-height: 2em;
+	padding: $PADBASE;
+
+	background-color: $CP1D;
+	color: $BLACK2;
+
+	font-family: monospace, monospace;
+}
+
+/*	Navs
+	************************************************** */
+.hnav {
+	display: block;
+	margin: 0;
+	padding: 0;
+
+	.navmenu {
+		margin: 0;
+		padding: 0;
+		background-color: $WHITE3;
+		color: $CP0D;
+
+		li {
+			list-style: none;
+			display: inline;
+			margin: 0;
+
+			a {
+				display: inline-block;
+				padding: 0.5em 0.5em;
+
+				background-color: $WHITE3;
+				color: $CP0D;
+
+				&:link,
+				&:visited {
+					background-color: $WHITE3;
+					color: $CP0D;
+				}
+				&:hover {
+					background-color: $CP1M;
+					text-decoration: none;
+				}
+				&:active {
+					background-color: $CP1D;
+					text-decoration: none;
+				}
+			}
+		}
+	}
+}

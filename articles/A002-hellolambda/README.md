@@ -3,7 +3,7 @@ title: "A002 - Hello Lambda"
 permalink: /articles/A002-hellolambda/index.html
 ---
 
-# A002 - Hello Lambda
+# A002 - Hello Lambda (Work In Progress)
 
 A simple template for simple scenarios: consider this the *"Getting Started"* template, a tad more than what you get in the official [AWS Lambda Developer Guide: Getting Started](http://docs.aws.amazon.com/lambda/latest/dg/getting-started.html).
 

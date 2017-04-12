@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html data-ng-app="app" ng-strict-di>
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+	<base href="/">
+
+	<title data-ng-bind="pageTitle"></title>
+	<style>
+		/* Help ng-show/ng-hide until the styles are loaded */
+		.ng-hide { display: none!important; }
+	</style>
+	<!-- TODO: favicons -->
+
+	<!-- Material Icons: -->
+	<!-- as font, via Google Web Fonts -->
+	<!-- see: http://google.github.io/material-design-icons/#icon-font-for-the-web -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+	<!-- bower:css -->
+	<!-- endbower -->
+
+	<!-- inject:css -->
+	<!-- endinject -->
+</head>
+<body>
+	<!--[if lt IE 10]>
+	  <p>You are using an <strong>outdated</strong> browser. Please
+		 <a href="http://browsehappy.com/">upgrade your browser</a>
+		 to improve your experience.</p>
+	<![endif]-->
+	<div ui-view id="RootView" class="scopebox"></div>
+
+	<!-- apigClient: AWS-generated JS Client SDK for the Service -->
+	<script type="text/javascript" src="static/scripts/lib/axios/dist/axios.standalone.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/CryptoJS/rollups/hmac-sha256.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/CryptoJS/rollups/sha256.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/CryptoJS/components/hmac.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/CryptoJS/components/enc-base64.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/url-template/url-template.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/apiGatewayCore/sigV4Client.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/apiGatewayCore/apiGatewayClient.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/apiGatewayCore/simpleHttpClient.js"></script>
+	<script type="text/javascript" src="static/scripts/lib/apiGatewayCore/utils.js"></script>
+	<script type="text/javascript" src="static/scripts/apigClient.js"></script>
+	<!-- /apigClient -->
+
+	<!-- bower:js -->
+	<!-- endbower -->
+
+	<!-- inject:js -->
+	<!-- endinject -->
+</body>
+</html>

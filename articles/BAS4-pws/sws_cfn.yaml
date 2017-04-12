@@ -1,0 +1,477 @@
+# ============================================================
+# sws_cfn.yaml
+# ============================================================
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+
+Parameters:
+# ============================================================
+   SWSID:
+      Type: "String"
+      Description: "Instance Identifier"
+      Default: "sapidev"
+      ConstraintDescription: "At least one character; only lowercase letters and digits (a-z0-9)"
+      AllowedPattern: "[a-z0-9]+"
+      MinLength: 1
+
+   AUTHCLIENTID:
+      Type: "String"
+      Description: "Client Application ID according to the Identity Provider"
+
+   AUTHTENANT:
+      Type: "String"
+      Description: "Tenant ID according to the Identity Provider"
+
+Resources:
+# ============================================================
+
+   SWSCertsBucket:
+   # =========================================================
+      Type: "AWS::S3::Bucket"
+      Properties:
+         BucketName: { "Fn::Join": [".", [ "Ref": "SWSID", "certs" ] ] }
+         AccessControl: "PublicRead"
+
+   SWSRole:
+   # =========================================================
+      Type: "AWS::IAM::Role"
+      Properties:
+         RoleName: { "Fn::Join": [".", [ "Ref": "SWSID", "swsrole" ] ] }
+         AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+               -
+                  Effect: "Allow"
+                  Principal:
+                     Service:
+                        - "lambda.amazonaws.com"
+                  Action:
+                     - "sts:AssumeRole"
+               -
+                  Effect: "Allow"
+                  Principal:
+                     Service:
+                        - "apigateway.amazonaws.com"
+                  Action:
+                     - "sts:AssumeRole"
+
+   SWSPolicy:
+   # =========================================================
+      Type: "AWS::IAM::Policy"
+      DependsOn: ["SWSRole"]
+      Properties:
+         PolicyName: { "Fn::Join": [".", [ "Ref": "SWSID", "swspolicy" ] ] }
+         # Groups | Roles | Users
+         Roles: [ { "Ref": "SWSRole" } ]
+         PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+               -
+                  Effect: "Allow"
+                  Action:
+                     - "logs:CreateLogGroup"
+                     - "logs:CreateLogStream"
+                     - "logs:PutLogEvents"
+                     - "logs:DescribeLogStreams"
+                  Resource: "arn:aws:logs:*:*:*"
+               -
+                  Effect: "Allow"
+                  Action:
+                     - "lambda:InvokeFunction"
+                     - "lambda:InvokeAsync"
+                  Resource: "*"
+               -
+                  Effect: "Allow"
+                  Action:
+                     - "s3:ListAllMyBuckets"
+                  Resource: "*"
+               -
+                  Effect: "Allow"
+                  Action:
+                     - "s3:ListBucket"
+                     - "s3:GetBucketLocation"
+                  Resource: "*"
+               -
+                  Effect: "Allow"
+                  Action:
+                     - "s3:PutObject"
+                     - "s3:GetObject"
+                     - "s3:DeleteObject"
+                  Resource: "*"
+
+   CertsGrabberLambda:
+   # =========================================================
+      Type: "AWS::Serverless::Function"
+      #DependsOn: ["SWSRole", "SWSCertsBucket"]
+      Properties:
+         Description: "Lambda to grab current certificates from MS Azure"
+         Runtime: "python2.7"
+         # Code | CodeUri:
+         CodeUri: ./certsgrabber.zip
+         FunctionName: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "certsgrabber" ]] }
+         Handler: "certsgrabber.lambda_handler"
+         MemorySize: 128
+         Timeout: 30
+         Role: { "Fn::GetAtt": ["SWSRole", "Arn"] }
+         Environment:
+            Variables:
+               DESTINATION_BUCKET: {"Ref": "SWSCertsBucket"}
+         Events:
+            CertsGrabberSchedule:
+               Type: "Schedule"
+               Properties:
+                  Schedule: "rate(6 hours)"
+
+   CustAuthLambda:
+   # =========================================================
+      Type: "AWS::Serverless::Function"
+      #DependsOn: ["SWSRole", "SWSCertsBucket"]
+      Properties:
+         Description: "Custom Authorizer Lambda"
+         Runtime: "python2.7"
+         # Code | CodeUri:
+         CodeUri: ./custauth.zip
+         FunctionName: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "custauth" ]] }
+         Handler: "custauth.lambda_handler"
+         MemorySize: 128
+         Timeout: 10
+         Role: { "Fn::GetAtt": ["SWSRole", "Arn"] }
+         Environment:
+            Variables:
+               AUTH_APP_ID: { "Ref": "AUTHCLIENTID" }
+               AUTH_TENANT_ID: { "Ref": "AUTHTENANT" }
+               CERTS_BUCKET: {"Ref": "SWSCertsBucket"}
+         Policies: AWSLambdaBasicExecutionRole
+
+   DirectorsLambda:
+   # =========================================================
+      Type: "AWS::Serverless::Function"
+      DependsOn: ["SWSRole"]
+      Properties:
+         Description: "Lambda producing list of Directors"
+         Runtime: "python2.7"
+         # Code | CodeUri:
+         CodeUri: ./directors.zip
+         FunctionName: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "directors" ]] }
+         Handler: "directors.lambda_handler"
+         MemorySize: 128
+         Timeout: 3
+         Role: { "Fn::GetAtt": ["SWSRole", "Arn"] }
+         Policies: AWSLambdaBasicExecutionRole
+
+   DirectorsLambdaPermission:
+   # =========================================================
+      Type: "AWS::Lambda::Permission"
+      DependsOn: ["DirectorsLambda", "SWSAPI"]
+      Properties:
+         Action: "lambda:InvokeFunction"
+         FunctionName: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "directors" ]] }
+         Principal: "apigateway.amazonaws.com"
+         SourceArn: {
+            "Fn::Join": [ "", [
+                  { "Fn::Join": [":", ["arn:aws:execute-api", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, { "Ref": "SWSAPI" }]] },
+                  "/*/GET/directors"
+               ]
+            ]
+         }
+
+   AgentsLambda:
+   # =========================================================
+      Type: "AWS::Serverless::Function"
+      DependsOn: ["SWSRole"]
+      Properties:
+         Description: "Lambda producing list of Agents"
+         Runtime: "python2.7"
+         # Code | CodeUri:
+         CodeUri: ./agents.zip
+         FunctionName: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "agents" ]] }
+         Handler: "agents.lambda_handler"
+         MemorySize: 128
+         Timeout: 3
+         Role: { "Fn::GetAtt": ["SWSRole", "Arn"] }
+         Policies: AWSLambdaBasicExecutionRole
+
+   AgentsLambdaPermission:
+   # =========================================================
+      Type: "AWS::Lambda::Permission"
+      DependsOn: ["AgentsLambda", "SWSAPI"]
+      Properties:
+         Action: "lambda:InvokeFunction"
+         FunctionName: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "agents" ]] }
+         Principal: "apigateway.amazonaws.com"
+         SourceArn: {
+            "Fn::Join": [ "", [
+                  { "Fn::Join": [":", ["arn:aws:execute-api", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, { "Ref": "SWSAPI" }]] },
+                  "/*/GET/agents"
+               ]
+            ]
+         }
+
+   SWSAPI:
+   # =========================================================
+      Type: "AWS::ApiGateway::RestApi"
+      DependsOn: ["DirectorsLambda", "AgentsLambda", "CustAuthLambda", "SWSRole"]
+      Properties:
+         Name: { "Fn::Join": ["-", [ { "Ref": "SWSID" }, "RestAPI" ]] }
+         Description: "Shield Web Service REST API"
+         # Body | BodyS3Location:
+         # BodyS3Location: ./swagger.yaml
+         Body:
+         # ===================================================
+         # SWSAPI Swagger/OpenAPI + AWS extensions START
+         # ===================================================
+            swagger: "2.0"
+            info:
+               version: "0.0.1"
+               title: "SWS Rest API"
+               description: "Shield Rest API"
+            #host: todo.test.com
+            #basePath: /api
+            schemes:
+               - https
+            consumes:
+              - application/json
+            produces:
+              - application/json
+            securityDefinitions:
+               SWSAPICustAuthorizer:
+                  type: "apiKey"
+                  name: "Authorization"
+                  in: "header"
+                  x-amazon-apigateway-authtype: "oauth2"
+                  x-amazon-apigateway-authorizer:
+                     type: "token"
+                     authorizerUri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["CustAuthLambda", "Arn"]}, "/invocations" ] ] }
+                     authorizerCredentials : {"Fn::GetAtt" : ["SWSRole", "Arn"] }
+
+            # ==================================================
+            paths:
+            # ==================================================
+
+               # ===============================================
+               /directors:
+               # ===============================================
+                  options:
+                  # ============================================
+                     summary: "CORS Support"
+                     description: "Enable CORS Support"
+                     responses:
+                        "200":
+                           description: "200-OK for OPTIONS"
+                           schema:
+                              $ref: "#/definitions/Empty"
+                           headers:
+                              Access-Control-Allow-Headers:
+                                 type: "string"
+                              Access-Control-Allow-Methods:
+                                 type: "string"
+                              Access-Control-Allow-Origin:
+                                 type: "string"
+                     x-amazon-apigateway-integration:
+                        type: "mock"
+                        passthroughBehavior: "when_no_match"
+                        requestTemplates:
+                           application/json: |
+                              {
+                                 "statusCode": 200
+                              }
+                        responses:
+                           "default":
+                              statusCode: "200"
+                              responseParameters:
+                                 method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+                                 method.response.header.Access-Control-Allow-Methods: "'*'"
+                                 method.response.header.Access-Control-Allow-Origin : "'*'"
+                              responseTemplates:
+                                 application/json: |
+                                    {}
+
+                  get:
+                  # ============================================
+                     description: "Retrieve list of directors"
+                     parameters:
+                        -
+                           name: "Authorization"
+                           in: "header"
+                           required: false
+                           type: "string"
+                     security:
+                        - SWSAPICustAuthorizer: []
+                     responses:
+                        "200":
+                           description: "200-OK response"
+                           schema:
+                              $ref: "#/definitions/ArrayOfDirectors"
+                           headers:
+                              Access-Control-Allow-Headers:
+                                 type: "string"
+                              Access-Control-Allow-Methods:
+                                 type: "string"
+                              Access-Control-Allow-Origin:
+                                 type: "string"
+                     x-amazon-apigateway-integration:
+                        responses:
+                           "default":
+                              statusCode: "200"
+                              responseParameters:
+                                 method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+                                 method.response.header.Access-Control-Allow-Methods: "'*'"
+                                 method.response.header.Access-Control-Allow-Origin : "'*'"
+                        uri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["DirectorsLambda", "Arn"]}, "/invocations" ] ] }
+                        passthroughBehavior: "when_no_match"
+                        httpMethod: "POST"
+                        contentHandling: "CONVERT_TO_TEXT"
+                        type: "aws"
+
+               # ===============================================
+               /agents:
+               # ===============================================
+                  options:
+                  # ============================================
+                     summary: "CORS Support"
+                     description: "Enable CORS Support"
+                     responses:
+                        "200":
+                           description: "200-OK for OPTIONS"
+                           schema:
+                              $ref: "#/definitions/Empty"
+                           headers:
+                              Access-Control-Allow-Headers:
+                                 type: "string"
+                              Access-Control-Allow-Methods:
+                                 type: "string"
+                              Access-Control-Allow-Origin:
+                                 type: "string"
+                     x-amazon-apigateway-integration:
+                        type: "mock"
+                        passthroughBehavior: "when_no_match"
+                        requestTemplates:
+                           application/json: |
+                              {
+                                 "statusCode": 200
+                              }
+                        responses:
+                           "default":
+                              statusCode: "200"
+                              responseParameters:
+                                 method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+                                 method.response.header.Access-Control-Allow-Methods: "'*'"
+                                 method.response.header.Access-Control-Allow-Origin : "'*'"
+                              responseTemplates:
+                                 application/json: |
+                                    {}
+
+                  get:
+                  # ============================================
+                     description: "Retrieve list of agents"
+                     parameters:
+                        -
+                           name: "Authorization"
+                           in: "header"
+                           required: false
+                           type: "string"
+                     security:
+                        - SWSAPICustAuthorizer: []
+                     responses:
+                        "200":
+                           description: "200-OK response"
+                           schema:
+                              $ref: "#/definitions/ArrayOfAgents"
+                           headers:
+                              Access-Control-Allow-Headers:
+                                 type: "string"
+                              Access-Control-Allow-Methods:
+                                 type: "string"
+                              Access-Control-Allow-Origin:
+                                 type: "string"
+                     x-amazon-apigateway-integration:
+                        responses:
+                           "default":
+                              statusCode: "200"
+                              responseParameters:
+                                 method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+                                 method.response.header.Access-Control-Allow-Methods: "'*'"
+                                 method.response.header.Access-Control-Allow-Origin : "'*'"
+                        uri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["AgentsLambda", "Arn"]}, "/invocations" ] ] }
+                        passthroughBehavior: "when_no_match"
+                        httpMethod: "POST"
+                        contentHandling: "CONVERT_TO_TEXT"
+                        type: "aws"
+
+            # ==================================================
+            definitions:
+            # ==================================================
+
+               # ===============================================
+               Empty:
+               # ===============================================
+                  type: object
+
+               # ===============================================
+               ErrorModel:
+               # ===============================================
+                  type: object
+                  required:
+                     - code
+                     - message
+                  properties:
+                     code:
+                        type: integer
+                        format: int32
+                     message:
+                        type: string
+
+               # ===============================================
+               Director:
+               # ===============================================
+                  type: object
+                  required:
+                     - id
+                  properties:
+                     id:
+                        type: string
+                     name:
+                        type: string
+
+               # ===============================================
+               ArrayOfDirectors:
+               # ===============================================
+                  type: array
+                  items:
+                     $ref: "#/definitions/Director"
+
+               # ===============================================
+               Agent:
+               # ===============================================
+                  type: object
+                  required:
+                     - id
+                  properties:
+                     id:
+                        type: string
+                     name:
+                        type: string
+                     notes:
+                        type: string
+
+               # ===============================================
+               ArrayOfAgents:
+               # ===============================================
+                  type: array
+                  items:
+                     $ref: "#/definitions/Agent"
+
+         # ===================================================
+         # SWSAPI Swagger/OpenAPI + AWS extensions END
+         # ===================================================
+
+Outputs:
+# ============================================================
+   SWSRestApiId:
+      Description: "SWSRestApiId"
+      Value: { "Ref": "SWSAPI" }
+
+
+
+
+

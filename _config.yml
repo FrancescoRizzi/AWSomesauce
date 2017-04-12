@@ -67,6 +67,21 @@ kramdown:
          line_numbers: true
          start_line: 1
 
+# Exclude:
+# Some articles can be used to build apps in-place.
+# This may creates folders and files we MUST EXCLUDE
+# when rebuilding the Jekyll static site.
+# ============================================================
+exclude:
+   # =========================================================
+   - "articles/BAS2-uwa/bower_components/"
+   - "articles/BAS2-uwa/dist/"
+   - "articles/BAS2-uwa/node_modules/"
+   # =========================================================
+   - "articles/BAS3-pwa/bower_components/"
+   - "articles/BAS3-pwa/dist/"
+   - "articles/BAS3-pwa/node_modules/"
+
 # Custom Error/404 page:
 # ============================================================
 permalink: /404.html

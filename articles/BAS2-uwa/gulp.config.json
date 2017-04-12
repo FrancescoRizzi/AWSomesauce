@@ -1,0 +1,9 @@
+{
+	"paths": {
+		"src": "src",
+		"dest": "dist"
+	},
+	"serve": {
+		"port": 8080
+	}
+}
