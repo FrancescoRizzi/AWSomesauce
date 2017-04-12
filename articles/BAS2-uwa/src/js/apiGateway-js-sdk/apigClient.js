@@ -86,12 +86,12 @@ apigClientFactory.newClient = function (config) {
     apigClient.agentsGet = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
         
-        apiGateway.core.utils.assertParametersDefined(params, ['Authorization'], ['body']);
+        apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
         
         var agentsGetRequest = {
             verb: 'get'.toUpperCase(),
             path: pathComponent + uritemplate('/agents').expand(apiGateway.core.utils.parseParametersToObject(params, [])),
-            headers: apiGateway.core.utils.parseParametersToObject(params, ['Authorization']),
+            headers: apiGateway.core.utils.parseParametersToObject(params, []),
             queryParams: apiGateway.core.utils.parseParametersToObject(params, []),
             body: body
         };
@@ -122,12 +122,12 @@ apigClientFactory.newClient = function (config) {
     apigClient.directorsGet = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
         
-        apiGateway.core.utils.assertParametersDefined(params, ['Authorization'], ['body']);
+        apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
         
         var directorsGetRequest = {
             verb: 'get'.toUpperCase(),
             path: pathComponent + uritemplate('/directors').expand(apiGateway.core.utils.parseParametersToObject(params, [])),
-            headers: apiGateway.core.utils.parseParametersToObject(params, ['Authorization']),
+            headers: apiGateway.core.utils.parseParametersToObject(params, []),
             queryParams: apiGateway.core.utils.parseParametersToObject(params, []),
             body: body
         };
