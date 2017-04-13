@@ -8,7 +8,8 @@ permalink: /articles/BAS4-pws/index.html
 # Building a Shield: Protecting the Web Service
 
 Our web app may require the user to login through the corporate identity provider, but our web service is still open for all to access indiscriminately.
-That will not do for our highly sensitive information (and any operation we may provide through the web service). On the plus side, the web app is already set to feed the user's credentials to the web service, with each request it makes, so all we have to do is make this information required and validate it.
+That will not do for our highly sensitive information (and any operation we may provide through the web service).<br />
+On the plus side, the web app is already set to feed the user's credentials to the web service, with each request it makes, so all we have to do is make this information required and validate it.
 
 ## The Use Case
 
@@ -19,7 +20,7 @@ The core features of the web service are not going to change, so we expect it wi
 
 However, each of these API endpoints should require the user's credentials to be provided in the **Authentication** HTTP Header. When credentials are missing, or invalid, the service should reject the request, returning an error status code.
 
-## Quick Refresh
+### What We Start With
 
 As a reminder, based on what we put together as our [Unprotected Web Service](../BAS1-uws/README.md), here's what we start with:
 
@@ -30,30 +31,47 @@ As a reminder, based on what we put together as our [Unprotected Web Service](..
    * **Lambda Functions and Permissions:** namely *DirectorsLambda*, *DirectorsLambdaPermission*, *AgentsLambda*, and *AgentsLambdaPermission*, configuring the Python scripts above as Lambda Functions and ensuring they can be triggered by the *SWSAPI* REST API methods.
 * **A make script:** namely [make.sh](./make.sh) to streamline the operations related to deploying the web service to AWS: preparing lambda packages, packaging the CloudFormation template, deploying it, and obtaining the corresponding JS SDK.
 
-## Validating Tokens
+## How We'll Auth
 
-The primary job of the Custom Authorizer will be that of verifying the validity of the user credentials received in the form of a [JWT Token](https://jwt.io/) as issued by the MS Azure AD identity provider. A good reference on the topic is available on [MS Azure AD Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-tokens#validating-tokens). In short, the custom authorizer will:
+AWS API Gateway provides a feature that serves our purpose, known as **Custom Authorizers** ([here's the official AWS docs](http://docs.aws.amazon.com/apigateway/latest/developerguide/use-custom-authorizer.html)). These are Lambda functions you can specify as authorizers for REST APIs and methods in AWS API Gateway; they are invoked when a configured HTTP endpoint is triggered, and are intended to determine whether the incoming request should be rejected as *unauthorized* or served (and, in this case, what resources the request should have access to).
+
+### Custom Auth Interface
+
+Custom Authorizers are provided with an **authorizationToken**, which API Gateway can fill with any data from the incoming HTTP request. In our case, for instance, we'll have API Gateway grab the value of the **Authorization** HTTP header, and pass it as authorizationToken.
+
+In return, Custom Authorizers are expected to do one of the following:
+
+* **Raise an exception:** if the request should not be served due to issues with the data received (eg: missing or misformatted credentials, etc..);
+   * API Gateway will produce a response with status **401 - Unauthorized**
+* **Produce an IAM Policy:** describing the API Gateway resources the request should be granted and denied access to; API Gateway will then attempt to use that policy in continuing the processing fo the request;<br />
+   * API gateway will produce a response with status **403 - Forbidden** if the policy *Denies* access to the necessary resource
+
+Our Custom Authorizer will validate the authorizationToken and produce a policy that will either *Allow* or *Deny* access to all of the API Gateway resources in our REST API.
+
+### Token Validation
+
+The primary job of our Custom Authorizer will be that of verifying the validity of the user credentials received in the form of a [JWT Token](https://jwt.io/), as issued by the MS Azure AD identity provider (eg: when the user logged in through the web app). A good reference on the topic is available on [MS Azure AD Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-tokens#validating-tokens). In short, the custom authorizer will:
 
 * Extract the *kid* (*Key Identifier*) property from the token's headers
-* Retrieve the Certificate published by MS Azure AD, and associated with that *kid* value
+* Retrieve the X.509 Certificate published by MS Azure AD, and associated with that *kid* value
 * Extract the public key from the certificate
 * Use the public key to verify the signature on the token
 * Verify other token claims
 
 The same documentation gives us information on how to obtain the certificates used by MS Azure AD:
 
-* Access the MS OpenID Connect metadata document at https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
-* Find the value of the *jwks_uri* property (eg: https://login.microsoftonline.com/common/discovery/v2.0/keys), and access that document
+* Access the MS OpenID Connect metadata document at [https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration](https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration)
+* Find the value of the *jwks_uri* property (eg: [https://login.microsoftonline.com/common/discovery/v2.0/keys](https://login.microsoftonline.com/common/discovery/v2.0/keys)), and access that document
 * Among the *keys* listed, find one with the *kid* (and *x5t*) properties matching the *kid* value from the token to be validated
 * Use the value of the first item in the *x5c* list for that key as an X.509 certificate
 
-In order to simplify the operations of our custom authorizer, and minimize the latency of our system, we'll perform the retrieval of these certificates separately. Furthermore, we'll implement this retrieval as an automated scheduled process, because Microsoft warns us that:
+In order to simplify the operations of our custom authorizer, and minimize the latency of our system, we'll perform the retrieval of these certificates separately. Furthermore, we'll implement this retrieval as an automated scheduled process, since Microsoft warns us that:
 
 > The v2.0 endpoint periodically rotates the possible set of keys, so your app should be written to handle those key changes automatically. A reasonable frequency to check for updates to the public keys used by the v2.0 endpoint is every 24 hours.
 
 ## Certsgrabber
 
-As certsgrabber (the script to perform the retrieval of the MS Azure certificates) requires the use of a 3rd-party library (the [requests](http://docs.python-requests.org/en/master/) library), and this library is not built-in to the [AWS Lambda Execution Environment](http://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html), things get a bit more complicated than they were for the *agents.py* and *directors.py* scripts.
+Certsgrabber (the script to perform the retrieval of the MS Azure certificates) requires the use of a 3rd-party library (the [requests](http://docs.python-requests.org/en/master/) library), and this library is not built-in to the [AWS Lambda Execution Environment](http://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html). Thus, things get a bit more complicated than they were for the *agents.py* and *directors.py* scripts.
 
 Namely, we'll develop certsgrabber in a [virtual environment](http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/) in the *\certsgrabber* subdirectory, so that we will be able to determine its dependencies when we need to build its Lambda Deployment Package.
 
@@ -62,7 +80,7 @@ The one-time setup for certsgrabber:
 * Install virtualenv and [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) globally:
    * `$> pip install virtualenv`
    * `$> pip install virtualenvwrapper`
-* Create, activate, and configure a *certsgrabber* project to use the *\keygrabber* subdirectory:
+* Create, activate, and configure a *certsgrabber* project to use the *\certsgrabber* subdirectory:
    * `$> mkproject certsgrabber`
    * `$> setvirtualenvproject $VIRTUAL_ENV <path/to/>/certsgrabber`
    * `$> cdproject`
@@ -73,8 +91,8 @@ The one-time setup for certsgrabber:
 
 [certsgrabber.py](./certsgrabber/certsgrabber.py) is pretty straight forward:
 
-* It requires a **DESTINATION_BUCKET** environmental variable that should be set to the name of the S3 bucket to save the certificates to
-* It retrieves the list of keys from https://login.microsoftonline.com/common/discovery/v2.0/keys, and saves them to the bucket
+* It requires a **DESTINATION_BUCKET** environmental variable, the name of the S3 bucket to save the certificates to
+* It retrieves the list of keys from [https://login.microsoftonline.com/common/discovery/v2.0/keys](https://login.microsoftonline.com/common/discovery/v2.0/keys), and saves them to the bucket
    * Each key's *kid* property is used as key for the object in the bucket
 
 ### Certsgrabber CloudFormation
@@ -90,19 +108,19 @@ We modify the [sws_cfn.yaml](./sws_cfn.yaml) CloudFormation template:
 
 ### Certsgrabber and make
 
-As mentioned above, certsgrabber script relies upon a 3rd-party library (*requests*) which is not available by default in the [AWS Lambda Execution Environment](http://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html). If you remember back when we created the [Unprotected Web Service](../BAS1-uws/README.md), there was a section (*"Lambdas and Cloud Formations"*) describing the different scenarios when building a Lambda Deployment Package.
+As mentioned above, certsgrabber relies upon a 3rd-party library (*requests*) which is not available by default in the [AWS Lambda Execution Environment](http://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html). If you remember back when we created the [Unprotected Web Service](../BAS1-uws/README.md), there was a section (*"Lambdas and Cloud Formations"*) describing the different scenarios when building a Lambda Deployment Package.
 
-So, we modify our [make.sh](./make.sh) script:
+Accordingly, we modify our [make.sh](./make.sh) script:
 
-* **VENVS_HOME:** a new configurable parameter, which should point to the location on your drive of the virtual environments home directory (eg: *VENVS_HOME="$WORKON_HOME"*, as the *$WORKON_HOME* environmental variable should point to the appropriate location)
+* **Add VENVS_HOME:** a new configurable parameter, which should point to the location on your drive of the virtual environments home directory (eg: *VENVS_HOME="$WORKON_HOME"*, as the *$WORKON_HOME* environmental variable should point to the appropriate location)
 * **Remove certsgrabber.zip:** in case this is not our first build
 * **Create a new certsgrabber.zip archive:** with the following contents:
    * **/certsgrabber/certsgrabber.py**
-   * **any dependency** as found in *$VENVS_HOME/certsgrabber/lib/python2.7/site-packages*
+   * **any dependency** found in *$VENVS_HOME/certsgrabber/lib/python2.7/site-packages*
 
 ## CustAuth
 
-Now that we can assume the certificates will be available in a known S3 bucket, we can work on the Custom Authorizer that should implement the token validation: custauth. This too will have to rely on 3rd-party libraries, and therefore developed in a virtual environment.
+With the signing certificates available in a known S3 bucket, we can work on the Custom Authorizer to validate the tokens: custauth. This too will have to rely on 3rd-party libraries, and therefore should be developed in a virtual environment.
 
 The one-time setup for cauth:
 
@@ -118,24 +136,24 @@ The one-time setup for cauth:
 
 ### CustAuth.py
 
-You can read throughout the code in [/custauth/custauth.py](./custauth/custauth.py) of course, but here's some highlights:
+You can read throughout the code in [/custauth/custauth.py](./custauth/custauth.py), but here are some highlights:
 
 * 3rd-party modules:<br />
-   * **pyjwt:** https://pyjwt.readthedocs.io/en/latest/
-   * **cryptography:** https://cryptography.io/en/latest/
+   * **pyjwt:** [pyjwt.readthedocs.io](https://pyjwt.readthedocs.io/en/latest/)
+   * **cryptography:** [cryptography.io](https://cryptography.io/en/latest/)
 * Environmental Variables:<br />
-   * **AUTH_APP_ID:** the MS Azure AD application ID
+   * **AUTH_APP_ID:** the MS Azure AD application/client ID
    * **AUTH_TENANT_ID:** the MS Azure AD tenant ID
    * **CERTS_BUCKET:** the name of the S3 Bucket with the MS Azure certificates
 * **401 - Unauthorize:** the error code we return if we don't receive an *authorizationToken* to validate
-* **403 - Forbidden:** the error code we return if the validation fails (custauth will return a policy set to *deny* access, and API gateway will produce this error)
+* **403 - Forbidden:** the error code we return if the validation fails (custauth will return a policy set to *Deny* access, and API gateway will produce this error)
 * **Token Validation:** in *TokenValidator* you can see the steps involved:<br />
-   * Verify the incoming authorization token is in the form *"Bearer id_token"*
-   * The *id_token* is parsed without verification to extract the *kid* header
-   * We retrieve a certificate matching the *kid* property from S3 (and fail validation if we can't find it)
+   * Verify the incoming authorization token is in the form *"Bearer \<id_token>"*
+   * The *id_token* is parsed (without verification), to extract the *kid* header
+   * We retrieve a certificate matching the *kid* header from S3 (and fail validation if we can't find it)
    * We wrap the certificate in the standard *PEM* delimiters (and format it according to the 64 characters per line rule)
    * We extract the public key from the X.509 certificate
-   * We use that key to attempt to verify the *id_token*, as well as other claims
+   * We use that key to attempt to verify the *id_token*, as well as other basic claims
 
 ### CustAuth CloudFormation
 
@@ -144,17 +162,17 @@ We modify the [sws_cfn.yaml](./sws_cfn.yaml) CloudFormation template:
 * **New Input Parameters:** that will be used as environmental variables for the CustAuth Lambda function:<br />
    * **AUTHCLIENTID:** The Client Id according to MS Azure AD
    * **AUTHTENANT:** The Tenant Id according to MS Azure AD
-* **New CustAuthLambda:** set to trigger the *custauth.lambda_handler* within the *custauth.zip* package, and specifying *AUTH_APP_ID*, *AUTH_TENANT_ID*, and *CERTS_BUCKET* environmental variables
+* **New CustAuthLambda:** set to trigger the *custauth.lambda_handler* within the *custauth.zip* package, with 3 environmental variables: *AUTH_APP_ID*, *AUTH_TENANT_ID*, and *CERTS_BUCKET*
 * **Modify the SWSAPI:**<br />
    * **DependsOn:** add *CustAuthLambda* among the resources the API is dependent on
-   * **Add a securityDefinitions:** with a *SWSAPICustAuthorizer* property specifying the cusom authorizer details
-* **Modify the GET method for the agents and directors paths:** by adding:
-   * The *Authorization* Header among the *parameters*
-   * The *security* property, holding the *SWSAPICustAuthorizer: []* item
+   * **Add a securityDefinitions:** with a *SWSAPICustAuthorizer* property specifying the custom authorizer details
+   * **Modify the GET method for the agents and directors paths:** by adding:
+      * The *Authorization* Header among the *parameters*
+      * The *security* property, holding the *SWSAPICustAuthorizer: []* item
 
 ### CustAuth and make
 
-As mentioned, the custauth.py relies on 3rd-party modules among which *pyjwt* and *cryptography*. As for the certsgrabber function, this implies we need to take care when building the Lambda Deployment Package. However, in this case, one of the 3rd-party modules (*cryptography*) has *binary dependencies*, which means it requires to be built for the specific target OS.
+As mentioned, the custauth.py relies on 3rd-party modules among which *pyjwt* and *cryptography*. As for the certsgrabber function, this implies we need to take care when building the Lambda Deployment Package. However, in this case, one of the 3rd-party modules (*cryptography*) has *binary dependencies*, which means it requires to be built targeting the run-time OS.
 
 As documented in the [AWS Lambda Execution Environment](http://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html), AWS Lambda uses images based on AMIs with Amazon Linux AMI as OS, listed [here](https://aws.amazon.com/amazon-linux-ami/).
 
@@ -164,7 +182,7 @@ Of course, we now have to modify the [make.sh](./make.sh) script to build the de
 
 This is similar to what we did for certsgrabber before, but:
 
-* **We skip some libraries when adding them from the virtual enbvironment dependencies:**
+* **We skip some libraries when adding them from the virtual environment dependencies:**
 
 ```shell
 zip -r9 $PACKZIP * \
@@ -187,8 +205,7 @@ zip -gr9 $PACKZIP \
    cryptography-1.8.1-py2.7.egg-info/
 ```
 
-* **We also add two Input Parameters:** *AUTH_APP_ID* and *AUTH_TENANT_ID*, which are then used when deploying the CloudFormation change set:
-   * `--parameter-overrides SWSID=$SWSID AUTH_CLIENTID=$AUTH_APP_ID AUTH_TENANT=$AUTH_TENANT_ID`
+* **We also add two Input Parameters:** *AUTH_APP_ID* and *AUTH_TENANT_ID*, which are then used when deploying the CloudFormation change set (via *--parameter-overrides* argument)
 
 ## Deploying to AWS
 
@@ -307,20 +324,27 @@ Requesting JS SDK:
 All Done.
 ```
 
+The Web Service is now secured.
+
 ## Update the Web App
 
-If you're using the [Shield Web App](../BAS3-pwa/README.md) as a front-end to the web service we just deployed, you'll likely want to:
+The previous step, of course, constitutes a new *release* of the web service. Although our main API method signature has not changed, internally we've tweaked their configuration by adding the Custom Authorizer. More importantly, at this stage, we made the *Authorization* HTTP header more prominent, as we expect it to carry the user credentials from the client.
 
-* grab the *aws_js_sdk.zip* file that was saved in the last step of the deployment script
+As a result, the JS SDK that AWS produces based on the REST API definition has changed (in particular, it explicitly looks for the *Authorization* header when building outgoing requests). Thus, we should update and deploy our web app.
+
+The write up about [Protecting the Web App](../BAS3-pwa/README.md) gives you all the details necessary, but the short version is:
+
+* grab the *aws_js_sdk.zip* file that was saved in the last step of the web service deployment script
 * use its contents to update your web app's *\src\js\apiGateway-js-sdk* directory
-* re-build locally via
+* re-build the web app locally via:<br />
+   (**Don't skip this**, *because the make script used to deploy uses as source the directory used as destination by this step*)
    * `$> gulp serve`
-* re-deploy the web app via
+* re-deploy the web app to AWS via
    * `$> ./make.sh`
 
 <div class="note warning">
    <h5>CloudFront Edge Caching:</h5>
-   <p>Our sample web app does not currently implement a versioned naming scheme for its files. If you already deployed the web app at least once, then the update you're deploying now may not be delivered to the web browsers until the objects in the CloudFront Distribution are expired or invalidated. See <a href="http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html#Invalidation_Expiration">the AWS Documentation</a> for more details, but a quick workaround is to use the AWS Web console, navigate to the CloudFront service page, select the Distribution your web app is deployed to, and in the <em>Invalidations</em> tab create a new one for the <em>*</em> path to invalidate all objects.</p>
+   <p>Our sample web app does not currently implement a versioned naming scheme for its files. If you already deployed the web app at least once, then the update you're deploying now may not be delivered to the web browsers until the objects in the CloudFront Distribution are expired or invalidated. See <a href="http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html#Invalidation_Expiration">the AWS Documentation</a> for more details, but a quick workaround is to use the AWS Web console, navigate to the CloudFront service page, select the Distribution your web app is deployed to, and in the <em>Invalidations</em> tab create a new one for the <em>/*</em> path to invalidate all objects.</p>
 </div>
 
 ## Progress

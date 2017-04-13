@@ -33,8 +33,8 @@
 
 		// Configure ADAL:
 		adalAuthenticationServiceProvider.init({
-			tenant: "<your_tenant_id>",
-			clientId: "<your_client_id>",
+			tenant: "your_tenant_id",
+			clientId: "your_client_id",
 			popUp: true
 		},
 		// Important: pass $httpProvider as second argument to let ADAL intercept outgoing requests

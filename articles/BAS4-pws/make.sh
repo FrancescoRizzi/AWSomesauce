@@ -40,7 +40,7 @@ LBUCKET="sws.lambdas"
 SWSID="swsdev"
 STACKNAME="SWSStack"
 VENVS_HOME="$WORKON_HOME"
-AUTH_APP_ID="your_app_client_id"
+AUTH_APP_ID="your_client_id"
 AUTH_TENANT_ID="your_tenant_id"
 
 # ============================================================

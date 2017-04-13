@@ -11,19 +11,17 @@ Do you need/want to secure your #AWS #Serverless #REST API #WebService, and matc
 * Include the id token in the requests from your web app to your web service as Authorization Bearer
 * Use a Custom Authorizer in your web service to validate the tokens, against the public certificates published by MS
 
-The 3 conceptual steps above actually turn into a few more practical steps, sorry. If you're in a hurry:
+The 3 conceptual steps above actually turn into a few more practical steps, sorry. If you're in a hurry, you can *skip ahead* to [BAS4](../BAS4-pws/README.md) and:
 
-* *Skip ahead* to [BAS4](../BAS4-pws/README.md) to:
-   * Build CertsGrabber (script to grab the certificates published by MS)
-   * Build CustAuth (the Custom Authorizer)
-   * Deploy the Web Service CloudFormation Stack
-   * Grab the auto-generated AWS JS SDK
-* Backtrack to [BAS3](../BAS3-pwa/README.md) to:
-   * Add the AWS JS SDK obtained in the previous step to the *\src\js\apiGateway-js-sdk* directory
-   * Build the Web App locally
-   * Deploy the Web App CloudFormation Stack
+* Build CertsGrabber (script to grab the certificates published by MS)
+* Build CustAuth (the Custom Authorizer)
+* Deploy the Web Service CloudFormation Stack
+* Grab the auto-generated AWS JS SDK
+* Copy the AWS JS SDK into the web app source directory
+* Build the Web App locally
+* Deploy the Web App CloudFormation Stack
 
-**KTHXBYE**
+> **KTHXBYE**
 
 # Building a Shield
 
