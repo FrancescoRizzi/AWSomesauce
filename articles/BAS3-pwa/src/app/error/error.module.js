@@ -25,7 +25,8 @@
 			},
 			data: {
 				pageTitle: 'Error'
-			}
+			},
+			requireADLogin: false
 		});
 	}
 

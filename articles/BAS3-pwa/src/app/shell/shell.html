@@ -1,5 +1,13 @@
 <h1 class="title">Shell</h1>
 
+<div class="authbox">
+   <span class="lbl">User Info:</span>
+   <span class="lbl">Is Authenticated?</span><span>{{userInfo.isAuthenticated}}</span>
+   <span class="lbl">User Name:</span><span>{{userInfo.userName}}</span>
+   <button data-ng-click="vm.Login()">Login</button>
+   <button data-ng-click="vm.Logout()">Logout</button>
+</div>
+
 <div class="nav-wrapper">
 	<nav id="MainNav" class="hnav">
 		<ul class="navmenu">

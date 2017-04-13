@@ -8,6 +8,7 @@
 
 	angular.module('app.services.swsclient', [
 		//Depends on apigClientFactory (non angular)
+		'AdalAngular'
 	]);
 
 	angular
@@ -15,7 +16,7 @@
 		.factory('SWSClient', SWSClient);
 
 	/* @ngInject */
-	function SWSClient($q) {
+	function SWSClient($q, adalAuthenticationService) {
 	//============================================================
 		var service = {
 			GetDirectors: GetDirectors,
@@ -27,47 +28,79 @@
 		//=========================================================
 		function GetDirectors() {
 			var deferred = $q.defer();
+			var adalToken = GetADALToken();
 
-			var apigClient = apigClientFactory.newClient();
-			var params = {};
-			var body = "{}";
-			var additionalParams = {};
+			if (adalToken) {
 
-			apigClient.directorsGet(params, body, additionalParams)
-				.then(function(response) {
-					console.log("SWSClient::GetDirectors: received response.");
-					var data = response.data.directors;
-					var serialized_data = JSON.stringify(data);
-					deferred.resolve(serialized_data);
-				})
-				.catch(function(err) {
-					HandleError(err, "GetDirectors");
-					deferred.reject(err);
-				});
+				var apigClient = apigClientFactory.newClient();
+				var params = {};
+				params['Authorization'] = 'Bearer '+adalToken;
+				var body = "{}";
+				var additionalParams = {};
+
+				apigClient.directorsGet(params, body, additionalParams)
+					.then(function(response) {
+						console.log("SWSClient::GetDirectors: received response.");
+						var data = response.data.directors;
+						var serialized_data = JSON.stringify(data);
+						deferred.resolve(serialized_data);
+					})
+					.catch(function(err) {
+						HandleError(err, "GetDirectors");
+						deferred.reject(err);
+					});
+			} else {
+				errmsg = "Could not find ADAL Token required for Web Service API request.";
+				HandleError(errmsg, "GetDirectors");
+				deferred.reject(errmsg);
+			}
 			return deferred.promise;
 		}
 
 		//=========================================================
 		function GetAgents() {
 			var deferred = $q.defer();
+			var adalToken = GetADALToken();
 
-			var apigClient = apigClientFactory.newClient();
-			var params = {};
-			var body = "{}";
-			var additionalParams = {};
+			if (adalToken) {
 
-			apigClient.agentsGet(params, body, additionalParams)
-				.then(function(response) {
-					console.log("SWSClient::GetAgents: received response.");
-					var data = response.data.agents;
-					var serialized_data = JSON.stringify(data);
-					deferred.resolve(serialized_data);
-				})
-				.catch(function(err) {
-					HandleError(err, "GetAgents");
-					deferred.reject(err);
-				});
+				var apigClient = apigClientFactory.newClient();
+				var params = {};
+				params['Authorization'] = 'Bearer '+adalToken;
+				var body = "{}";
+				var additionalParams = {};
+
+				apigClient.agentsGet(params, body, additionalParams)
+					.then(function(response) {
+						console.log("SWSClient::GetAgents: received response.");
+						var data = response.data.agents;
+						var serialized_data = JSON.stringify(data);
+						deferred.resolve(serialized_data);
+					})
+					.catch(function(err) {
+						HandleError(err, "GetAgents");
+						deferred.reject(err);
+					});
+			} else {
+				errmsg = "Could not find ADAL Token required for Web Service API request.";
+				HandleError(errmsg, "GetDirectors");
+				deferred.reject(errmsg);
+			}
 			return deferred.promise;
+		}
+
+		//=========================================================
+		function GetADALToken() {
+			var endpointURI = 'app/intro/intro.html';
+			var adalToken = null;
+
+			var adalResource = adalAuthenticationService.getResourceForEndpoint(endpointURI);
+			console.log("ADAL Resource for endpoint URI '"+endpointURI+"': '"+adalResource+"'");
+			if (adalResource) {
+				adalToken = adalAuthenticationService.getCachedToken(adalResource);
+				console.log("ADAL Token for endpoint URI '"+endpointURI+"': '"+adalToken+"'");
+			}
+			return adalToken;
 		}
 
 		//=========================================================

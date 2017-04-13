@@ -29,7 +29,8 @@
 			abstract: true,
 			data: {
 				pageTitle: 'Shell'
-			}
+			},
+			requireADLogin: false
 		});
 
 	}

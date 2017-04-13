@@ -22,7 +22,8 @@
 			controllerAs: 'vm',
 			data: {
 				pageTitle: 'Agents'
-			}
+			},
+			requireADLogin: true
 		});
 	}
 

@@ -6,6 +6,14 @@
 		appVersion: '0.0.1'
 	};
 
+	window.Logging = {
+		// Recognized levels: 0: Error, 1: Warning, 2: Info, 3: Verbose
+		level: 3,
+		log: function (message) {
+			console.log(message);
+		}
+	};
+
 	angular.module('app')
 		.value('config', _app_config_)	//NOTE: (1)
 		.config(AppConfig)
@@ -17,11 +25,21 @@
 	// AppConfig:
 	//	configuration method for the app module
 	//============================================================
-	function AppConfig($locationProvider, $stateProvider, $urlRouterProvider, $httpProvider) {
+	function AppConfig($locationProvider, $stateProvider, $urlRouterProvider, $httpProvider, adalAuthenticationServiceProvider) {
 		console.log('AppConfig');
 
 		// Configure the urlRouteProvider to redirect to /intro by default
 		$urlRouterProvider.otherwise("/intro");
+
+		// Configure ADAL:
+		adalAuthenticationServiceProvider.init({
+			tenant: "<your_tenant_id>",
+			clientId: "<your_client_id>",
+			popUp: true
+		},
+		// Important: pass $httpProvider as second argument to let ADAL intercept outgoing requests
+		$httpProvider
+		);
 	}
 
 	// AppRun:

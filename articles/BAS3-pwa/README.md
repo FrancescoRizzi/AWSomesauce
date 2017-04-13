@@ -151,6 +151,7 @@ Of course, eventually we may want to show or hide some of these elements conditi
 
 We'll add these elements to the *shell* module so that they are available in all of the pages/states of the web app. In [/app/shell/shell.html](./src/app/shell/shell.html), right after the **Shell** title, and before the navigation menu:
 
+{% raw %}
 ```html
 <div class="authbox">
    <span class="title">User Info:</span>
@@ -160,6 +161,7 @@ We'll add these elements to the *shell* module so that they are available in all
    <button data-ng-click="vm.Logout()">Logout</button>
 </div>
 ```
+{% endraw %}
 
 Next, in [/app/shell/shell.js](./src/app/shell/shell.js), we add a reference to the *adalAuthenticationService* in the *ShellController* signature, add and expose the *Login* and *Logout* methods referenced in the HTML template above:
 
@@ -220,6 +222,9 @@ function GetDirectors() {
    return deferred.promise;
 }
 
+// Don't forget to update GetAgents like GetDirectors!
+//=========================================================
+
 // The GetADALToken method attempts to get the id_token from the
 // adalAuthenticationService internal cache.
 // It does so by using the relative path of the intro page/state
@@ -244,9 +249,8 @@ function GetADALToken() {
 
 <div class="note warning">
    <h5>MS Azure AD Redirect URI:</h5>
-   <p>When running locally, SWA uses the <em>localhost</em> root URI (eg: <em>http://localhost:8080</em>). For the log in process to work, your MS Azure AD needs to be configured with the same value as the application's '<em>redirect URI</em>'.</p>
+   <p>When running locally, SWA uses the <em>localhost:port</em> root URI (eg: <em>http://localhost:8080</em>). For the log in process to work, your MS Azure AD needs to be configured with the same value as one of the the application's '<em>Redirect URIs</em>'.</p>
 </div>
-
 
 As [before](../BAS2-uwa/README.md), we can initialize the local environment through the following one-time only commands:
 
@@ -260,24 +264,14 @@ And then we can build and serve the SWA web app through our gulp script:
 
 Your web browser should open to the root URI of the app (eg: *http://localhost:8080*), which will load the *shell* module (remember that one was configured with *requireADLogin: false*), redirect you to the *intro* module (which requires AD Loging), and open a pop-up pointing to the MS AD Login screen as configured for your tenant (**note that your web browser may be preventing the pop-up from being displayed**).
 
-![SWA on localhost - Log In Step 1](./PWA-SS01.png)
-
-Select the identity you wish to log in as, and enter the corresponding password.
-
-![SWA on localhost - Log In Step 2](./PWA-SS02.png)
-
-2-Step authentication may require you to enter a verification code (that your MS Azure AD service will send you), but when you're logged in, SWA will take over again, this time displaying the *intro* page:
-
-![SWA on localhost - Logged In](./PWA-SS03.png)
-
-Note that the new authentication details are displayed at the top, including the fact that you're currently authenticated, and your account's user name.
+See the next section for screenshots (as the appearance and behavior are the same).
 
 ## Hosting on AWS (HTTPS)
 
 <div class="note warning">
    <h5>MS Azure AD Redirect URI, and Custom Domain:</h5>
-   <p>As we will deploy to AWS, we won't be able to use <em>localhost</em> as the domain for our web app. In addition, as you deploy the web app through a CloudFront Distribution, AWS provides a default (<em>uuid</em>.cloudfront.net) domain, but we'd have to modify or reset our MS Azure AD configuration every time.<br />
-   So, in this section we deploy using a specific custom domain (<em>swa.domain.example</em>). if you want to follow along, you'll have to have a registered domain you can use, and set up your MS Azure AD to use <em>https://swa.domain.example/</em> as the <em>Redirect URI</em> for the app.</p>
+   <p>The root URI where the web app is hosted must be present among the MS Azure AD '<em>Redirect URIs</em>'.<br />
+      We'll use a sample domain ('https://<em>swa.domain.example</em>'), but you should use a domain you have registered, or the default domain that CloudFront will provide for your Distribution once you deploy it (eg: 'https://<em>uuid</em>.cloudfront.net').</p>
 </div>
 
 <div class="note warning">
@@ -359,17 +353,33 @@ All Done.
 
 ```
 
-Both *http* and *https* addresses are listed at the end, because we configured the CloudFront Distribution hosting our web app to **redirect to https** (*DefaultCacheBehavior\ViewerProtocolPolicy* setting in the [swa_cfn.yaml](./swa_cfn.yaml) CloudFormation template).
+Both *http* and *https* addresses are listed at the end, because we configured the CloudFront Distribution hosting our web app to **redirect to https** (via the *DefaultCacheBehavior\ViewerProtocolPolicy* setting in the [swa_cfn.yaml](./swa_cfn.yaml) CloudFormation template).
 
-**Note that your web browser may detect and report as a security issue** the fact that our web app is currently using a certificate from a different source. For instance, Chrome will display this error screen (and you'll have to expand the Advanced details and chose to proceed to swa.domain.example):
+<div class="note warning">
+   <h5>Security Warning:</h5>
+   <p>When you navigate to <em>https://swa.domain.example/</em> your web browser may report a security warning or error. This is because in the CloudFormation template above we've used the default certificate that CloudFront kindly provides for every distribution you create.<br />
+      In a production environment we would acquire a certificate for the domain, and use it instead of the default one.<br />
+      For our current purpose, simply chose to go ahead and access the site.</p>
+</div>
 
-![Chrome Security Warning](./PWA-SS04.png)
+![Chrome Security Warning](./PWA-ChromeSecurityWarning.png)
 
-In a production environment, we'd use a certificate generated for the domain and this issue would not appear.
+You should now be presented with a pop-up window to log in.
+
+![Log In Pop Up](./PWA-Login.png)
+
+Depending on your settings in MS Azure AD, the log in process may include sending you a verification code to enter in a secondary screen.
+Either way, when the log in is complete, our web app will receive your id token and behave as it used to when it was not protected.
+
+![Landing Page AFter Log In](./PWA-Landing.png)
+
+The data from the web service is also available, of course.
+
+![Directors Listing](./PWA-Directors.png)
 
 ## Progress!
 
-The web app is now secured (and still displays the list of agents and directors once you log in). However, we need to do more work on the web service side, otherwise a malicious user could interact directly with it, gaining access to the data and features we wish to protect.
+The web app is now secured. However, we need to do more work on the web service side, or a malicious user could simply sniff the traffic from our web app and interact directly with the web service API to obtain the sensitive data.
 
 # BAS Series
 * [BAS - Intro](../BAS-intro/README.md)

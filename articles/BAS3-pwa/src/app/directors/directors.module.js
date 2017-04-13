@@ -23,7 +23,8 @@
 			controllerAs: 'vm',
 			data: {
 				pageTitle: 'Directors'
-			}
+			},
+			requireADLogin: true
 		});
 	}
 
